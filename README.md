@@ -2,10 +2,14 @@
 
 ## Requirements 
 - node.js 18
-- cdk
 
 ## Get Started
 This project allows you to simply setup aws vpn ec2 instances without a hassle.
+
+It will deploy a openVPN setup for you. If you have a nextcloud server you can publish your openVPN directly to the server by setting your Nextcloud env variables (see table below).
+
+Otherwise you will need to ssh onto the server and copy the .ovpn files from the root users home directory (they are called like \<country\>Vpn.ovpn).
+They will allow you to easier connect to the vpn.
 
 You need to have the following environment variables in a .env file:
 
@@ -14,8 +18,8 @@ You need to have the following environment variables in a .env file:
 |---------------------|--------------------------------------------------------------------|
 | NEXT_CLOUD_USERNAME | A next cloud user name to upload the openVpn certificate           |
 | NEXT_CLOUD_PASSWORD | A next cloud user password to upload the openVpn certificate       |
-| AWS_ACCOUNT         | Account ID                                                         |
 | NEXT_CLOUD_DOMAIN   | Your nextcloud domain name (without protocol e.g. data.domain.com) |
+| AWS_ACCOUNT         | Account ID                                                         |
 | ACTIVE_VPNS         | ["india","usa"]                                                    |
 
 
