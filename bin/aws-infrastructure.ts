@@ -1,21 +1,61 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { AwsInfrastructureStack } from '../lib/aws-infrastructure-stack';
+import {VpnCreatorStack} from "../lib/vpn-creator/vpn-creator-stack";
+import {Tags} from "aws-cdk-lib";
+import 'dotenv/config';
+
+const ACCOUNT = process.env.AWS_ACCOUNT!
+const TagKeys = {
+    Environment: "Environment"
+}
+
+const TagValues = {
+    Environment: {
+        SDLC: "SDLC"
+    }
+}
+console.log("HERE" + process.env.NEXT_CLOUD_PASSWORD)
+const usaVpn =
+    {
+        region: 'us-east-1',
+        props: {
+            vpn: {clientName: "usaVpn"},
+            nextCloud: {
+                username: process.env.NEXT_CLOUD_USERNAME!,
+                password: process.env.NEXT_CLOUD_PASSWORD!,
+            }
+        }
+    }
+
+const indiaVpn =
+    {
+        region: 'ap-south-1',
+        props: {
+            vpn: {clientName: "indiaVpn"},
+            nextCloud: {
+                username: process.env.NEXT_CLOUD_USERNAME!,
+                password: process.env.NEXT_CLOUD_PASSWORD!,
+            }
+        }
+    }
+
+const vpns = (() => {
+    const activeVpns = []
+    const vpnsFromConfig: string[]= JSON.parse(process.env.ACTIVE_VPNS!)
+    if(vpnsFromConfig.includes("india")) activeVpns.push(indiaVpn)
+    if(vpnsFromConfig.includes("usa")) activeVpns.push(usaVpn)
+    return activeVpns
+})()
 
 const app = new cdk.App();
-new AwsInfrastructureStack(app, 'AwsInfrastructureStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
+vpns.forEach(vpn => {
+    new VpnCreatorStack(app, `RegionalVPNStack-${vpn.region}`, {
+        env: {
+            account: ACCOUNT,
+            region: vpn.region},
+        client: vpn.props
+    })
+})
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
-
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
-
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-});
+Tags.of(app).add(TagKeys.Environment, TagValues.Environment.SDLC);
