@@ -37,7 +37,7 @@ export class VpnCreatorStack extends cdk.Stack {
 
         const role = new aws_iam.Role(
             this,
-            'vpn-instance-1-role', // this is a unique id that will represent this resource in a Cloudformation template
+            'vpn-instance-1-role', 
             {assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com')}
         )
 
